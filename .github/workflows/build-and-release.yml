@@ -89,7 +89,15 @@ jobs:
         run: |
           BADGE_URL="https://img.shields.io/badge/AuthServer-v${{ github.event.inputs.version }}-blue"
           BADGE_MARKDOWN="[![Latest Release]($BADGE_URL)](https://github.com/UT-BT/auth-server/releases/tag/v${{ github.event.inputs.version }})"
-          sed -i "/^\\[!\\[Latest Release\\]/c\\$BADGE_MARKDOWN" README.md
+          
+          # Check if badge already exists in README
+          if grep -q "\\[!\\[Latest Release\\]" README.md; then
+            # Replace existing badge
+            sed -i "/^\\[!\\[Latest Release\\]/c\\$BADGE_MARKDOWN" README.md
+          else
+            # Add badge at the top of the README
+            sed -i "1i\\$BADGE_MARKDOWN\n" README.md
+          fi
 
       - name: Commit README Update
         run: |
@@ -97,7 +105,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git pull
           git add README.md
-          git commit -m "chore: Update README with latest release badge"
-          git push
+          git commit -m "chore: Update README with latest release badge" || echo "No changes to commit"
+          git push || echo "No changes to push"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
