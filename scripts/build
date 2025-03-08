@@ -1,0 +1,13 @@
+#!/bin/bash
+
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+SERVER_DIR=$(realpath "$SCRIPT_DIR/../cmd/server")
+output_path="./auth-server-$(git log -1 --format="%h")-dev"
+
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    output_path+=".exe"
+fi
+
+echo "Building auth-server..."
+(go build -ldflags "-X main.version=$(git log -1 --format="%h")-dev" -o "$output_path" "$SERVER_DIR" || exit 1) || exit 1
+echo "Built auth-server. Saved to: $output_path"
